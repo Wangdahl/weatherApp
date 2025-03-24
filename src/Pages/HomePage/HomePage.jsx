@@ -1,0 +1,60 @@
+import { useDispatch, useSelector  } from "react-redux";
+import { fetchWeatherData } from '../../redux/weatherSlice';
+import SearchBar from '../../Components/SearchBar/SearchBar';
+import CurrentWeather from '../../Components/CurrentWeather/CurrentWeather';
+import ForecastList from '../../Components/ForecastList/ForecastList';
+import AlertBanner from '../../Components/AlertBanner/AlertBanner';
+import Spinner from '../../Components/Spinner/Spinner';
+import './HomePage.css';
+
+function HomePage() {
+    const dispatch = useDispatch();
+    const weatherState = useSelector(state => state.weather);
+    const { current, daily, alerts, status, error, lastQuery } = weatherState;
+
+    //Handlers
+    const handleSearch = (query) => {
+        if(!query) return;
+        dispatch(fetchWeatherData(query));
+    };
+
+    return (
+        <main className='homepage'>
+            <SearchBar onSearch={handleSearch} />
+
+            {/*Display alerts if the exist */}
+            {alerts.length > 0 && <AlertBanner alerts={alerts} />}
+
+            {/*Display spinner if loading */}
+            {status === 'loading' && <Spinner />}
+
+            {/*Display error message if error */}
+            {status === 'failed' && error && (
+                <p className="error-message">{error}</p>
+            )}
+
+            {/*Display current weather if available */}
+            {current && status !== 'loading' && (
+                <CurrentWeather data={current} />
+            )}
+
+            {/*Display 5 day forecast if available */}
+            {daily && daily.length > 0 && status !== 'loading' && (
+                <ForecastList data={daily} />
+            )}
+        </main>
+    )
+}
+
+export default HomePage;
+
+
+
+
+
+
+
+
+
+
+

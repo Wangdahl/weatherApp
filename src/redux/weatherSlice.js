@@ -1,109 +1,137 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+const apiKey = import.meta.env.VITE_TOMORROW_API_KEY;
+const timelinesUrl = `https://api.tomorrow.io/v4/timelines?apikey=${apiKey}`;
 
-// Defining an async thunk to fetch weather data
+// Async thunk for fetching realtime weather and daily forecast
 export const fetchWeatherData = createAsyncThunk(
     'weather/fetchWeatherData',
-    async(locationQuery, { rejectWithValue }) => {
+    async (locationQuery, { rejectWithValue }) => {
         try {
-            const apiKey = import.meta.env.VITE_TOMORROW_API_KEY;
-            //Constructing the URL
-            const baseUrl = 'https://api.tomorrow.io/v4/weather';
-            const params = `location=${encodeURIComponent(locationQuery)}&units=metric&apikey=${apiKey}`;
-            
-            //Fetch current weather
-            const currentRes = await fetch(`${baseUrl}/realtime?${params}`);
-            const currentData = await currentRes.json();
-            //Fetch 5 day forecast
-            const forecastRes = await fetch(`${baseUrl}/forecast=${params}`);
-            const forecastData = await forecastRes.json();
-            //Fetch weather alerts
-            const alertsRes = await fetch(`${baseUrl}/alerts=${params}`);
-            const alertsData = await alertsRes.json();
+        // --- Realtime Data (Current) ---
+        const now = new Date();
+        // Create a 1-minute window for the "current" timestep
+        const oneMinuteLater = new Date(now.getTime() + 60 * 1000).toISOString();
+        const realtimeBody = {
+            location: locationQuery, // e.g., "New York, United States"
+            fields: ["temperature", "windSpeed", "weatherCode"],
+            timesteps: ["current"],
+            units: "metric",
+            startTime: now.toISOString(),
+            endTime: oneMinuteLater
+        };
 
-            const current = {
-                temp: currentData.data.values.temperature, //Current temperature
-                windSpeed: currentData.data.values.windSpeed, //Current wind speed
-                weatherCode: currentData.data.values.weatherCode, //Current weather code
-                cityName: currentData.data.location.name //resolved location
-            }
+        const realtimeRes = await fetch(timelinesUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(realtimeBody)
+        });
+        if (!realtimeRes.ok) {
+            const errorText = await realtimeRes.text();
+            throw new Error(`Realtime error: ${realtimeRes.status} - ${errorText}`);
+        }
+        const realtimeData = await realtimeRes.json();
 
-            //Parse forecast daily data 
-            //Tomorrow.io returns an array of daily intervals, we are interested in the first five
-            let daily = [];
-            if(forecastData.data && forecastData.data.timelines) {
-                const dailyIntervals = forecastData.data.timelines[0].intervals;
-                daily = dailyIntervals.slice(0, 5).map(intervals => ({
-                    date: intervals.startTime,
-                    tempMin: intervals.values.temperatureMin,
-                    tempMax: intervals.values.temperatureMax,
-                    windSpeed: intervals.values.windSpeed,
-                    weatherCode: intervals.values.weatherCode
-                }));
-            } else if (forecastData && forecastData.data.values) {
-                //If the API returns a simplified format
-                daily = forecastData.data.values.slice(0, 5);
-            }
+        // --- Daily Forecast Data (4-day forecast due to plan restriction) ---
+        const startTime = new Date().toISOString();
+        // Use 4 days ahead instead of 5 to avoid the Forbidden error.
+        const endTime = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString();
+        const dailyBody = {
+            location: locationQuery,
+            fields: ["temperatureMin", "temperatureMax", "windSpeed", "weatherCode"],
+            timesteps: ["1d"],
+            units: "metric",
+            startTime,
+            endTime
+        };
 
-            //Parse alerts data
-            let alerts = [];
-            if(alertsData.data) {
-                if(Array.isArray(alertsData.data)) {
-                    alerts = alertsData.data;
-                } else if(alertsData.data.events) {
-                    alerts = alertsData.data.events;
-                } else {
-                    alerts = alertsData.data;
-                }
-            }
+        const dailyRes = await fetch(timelinesUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dailyBody)
+        });
+        if (!dailyRes.ok) {
+            const errorText = await dailyRes.text();
+            throw new Error(`Daily forecast error: ${dailyRes.status} - ${errorText}`);
+        }
+        const dailyData = await dailyRes.json();
 
-            return { current, daily, alerts };
+        // --- Extracting Realtime Data ---
+        const realtimeTimeline = realtimeData.data.timelines[0];
+        const realtimeInterval = realtimeTimeline.intervals[0];
+        const currentValues = realtimeInterval.values;
+
+        const current = {
+            temp: currentValues.temperature,
+            windSpeed: currentValues.windSpeed,
+            weatherCode: currentValues.weatherCode,
+            cityName: realtimeData.location?.name || locationQuery
+        };
+
+        // --- Extracting Daily Forecast Data ---
+        const dailyTimeline = dailyData.data.timelines[0];
+        const daily = dailyTimeline.intervals.map(interval => ({
+            date: interval.startTime,
+            tempMin: interval.values.temperatureMin,
+            tempMax: interval.values.temperatureMax,
+            windSpeed: interval.values.windSpeed,
+            weatherCode: interval.values.weatherCode
+        }));
+
+        return { current, daily };
         } catch (err) {
-            // If any fetch fails or JSON parsing fails, we handle errors here
-            console.error('Error fetching weather data:', err);
-            return rejectWithValue('Failed to fetch weather data. Please try again.')
+        console.error('Error fetching weather data:', err);
+        return rejectWithValue('Failed to fetch weather data. Please try again.');
         }
     }
 );
-//Fetching hourly data for given location and date range
+
+// Async thunk for fetching hourly forecast data for a given date (24-hour period)
 export const fetchHourlyData = createAsyncThunk(
     'weather/fetchHourlyData',
-    async({ locationQuery, date }, { rejectWithValue }) => {
+    async ({ locationQuery, date }, { rejectWithValue }) => {
         try {
-            const apiKey = import.meta.env.VITE_TOMORROW_API_KEY;
-            const baseUrl = 'https://api.tomorrow.io/v4/weather';
+        const startTime = new Date(date).toISOString();
+        const endTime = new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000).toISOString();
+        const hourlyBody = {
+            location: locationQuery,
+            fields: ["temperature", "windSpeed", "weatherCode"],
+            timesteps: ["1h"],
+            units: "metric",
+            startTime,
+            endTime
+        };
 
-            // Fetching data for 24 hours from the given date
-            const startTimeISO = new Date(date).toISOString();
-            const endTimeISO = new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000).toISOString();
-            const params = `location=${encodeURIComponent(locationQuery)}&units=metric&apikey=${apiKey}&timesteps=1h&startTime=${startTimeISO}&endTime=${endTimeISO}`;
-            const response = await fetch(`${baseUrl}/forecast?${params}`);
-            const data = await response.json();
-            let hourly = [];
-            if(data.data && data.data.timelines) {
-                const hourlyIntervals = data.data.timelines[0].intervals;
-                hourly = hourlyIntervals.map(intervals => ({
-                    time: intervals.startTime,
-                    temp: intervals.values.temperature,
-                    windSpeed: intervals.values.windSpeed,
-                    weatherCode: intervals.values.weatherCode
-                }));
-            }
-            return hourly
+        const hourlyRes = await fetch(timelinesUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(hourlyBody)
+        });
+        if (!hourlyRes.ok) {
+            const errorText = await hourlyRes.text();
+            throw new Error(`Hourly forecast error: ${hourlyRes.status} - ${errorText}`);
+        }
+        const hourlyData = await hourlyRes.json();
+        const hourlyTimeline = hourlyData.data.timelines[0];
+        const hourly = hourlyTimeline.intervals.map(interval => ({
+            time: interval.startTime,
+            temp: interval.values.temperature,
+            windSpeed: interval.values.windSpeed,
+            weatherCode: interval.values.weatherCode
+        }));
+        return hourly;
         } catch (err) {
-            console.error('Error fetching hourly data:', err);
-            return rejectWithValue('Failed to fetch hourly data.');
+        console.error('Error fetching hourly data:', err);
+        return rejectWithValue('Failed to fetch hourly data.');
         }
     }
-)
-
+);
 
 const weatherSlice = createSlice({
     name: 'weather',
     initialState: {
         current: null,
         daily: [],
-        alerts: [],
         status: 'idle', // idle | loading | succeeded | failed
         error: null,
         lastQuery: '', // store the last searched location query
@@ -111,38 +139,35 @@ const weatherSlice = createSlice({
         hourlyStatus: 'idle',
         hourlyError: null
     },
-    reducers: {
-
-    },
+    reducers: {},
     extraReducers: (builder) => {
         builder
-            .addCase(fetchWeatherData.pending, (state, action) => {
-                state.status = 'loading';
-                state.error = null;
-            })
-            .addCase(fetchWeatherData.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.current = action.payload.current;
-                state.daily = action.payload.daily;
-                state.alerts = action.payload.alerts;
-                state.lastQuery = action.meta.arg; //Location we fetched data for
-            })
-            .addCase(fetchWeatherData.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload || 'Unable to fetch data';
-            })
-            .addCase(fetchHourlyData.pending, (state) => {
-                state.hourlyStatus = 'loading';
-                state.hourlyError = null;
-            })
-            .addCase(fetchHourlyData.fulfilled, (state, action) => {
-                state.hourlyStatus = 'succeeded';
-                state.hourly = action.payload;
-            })
-            .addCase(fetchHourlyData.rejected, (state, action) => {
-                state.hourlyStatus = 'failed';
-                state.hourlyError = action.payload || 'Unable to fetch hourly data';
-            })
+        .addCase(fetchWeatherData.pending, (state) => {
+            state.status = 'loading';
+            state.error = null;
+        })
+        .addCase(fetchWeatherData.fulfilled, (state, action) => {
+            state.status = 'succeeded';
+            state.current = action.payload.current;
+            state.daily = action.payload.daily;
+            state.lastQuery = action.meta.arg;
+        })
+        .addCase(fetchWeatherData.rejected, (state, action) => {
+            state.status = 'failed';
+            state.error = action.payload || 'Unable to fetch data';
+        })
+        .addCase(fetchHourlyData.pending, (state) => {
+            state.hourlyStatus = 'loading';
+            state.hourlyError = null;
+        })
+        .addCase(fetchHourlyData.fulfilled, (state, action) => {
+            state.hourlyStatus = 'succeeded';
+            state.hourly = action.payload;
+        })
+        .addCase(fetchHourlyData.rejected, (state, action) => {
+            state.hourlyStatus = 'failed';
+            state.hourlyError = action.payload || 'Unable to fetch hourly data';
+        });
     }
 });
 

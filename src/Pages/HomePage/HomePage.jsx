@@ -3,14 +3,13 @@ import { fetchWeatherData } from '../../redux/weatherSlice';
 import SearchBar from '../../Components/SearchBar/SearchBar';
 import CurrentWeather from '../../Components/CurrentWeather/CurrentWeather';
 import ForecastList from '../../Components/ForecastList/ForecastList';
-import AlertBanner from '../../Components/AlertBanner/AlertBanner';
 import Spinner from '../../Components/Spinner/Spinner';
 import './HomePage.css';
 
 function HomePage() {
     const dispatch = useDispatch();
     const weatherState = useSelector(state => state.weather);
-    const { current, daily, alerts, status, error, lastQuery } = weatherState;
+    const { current, daily, status, error, lastQuery } = weatherState;
 
     //Handlers
     const handleSearch = (query) => {
@@ -21,9 +20,6 @@ function HomePage() {
     return (
         <main className='homepage'>
             <SearchBar onSearch={handleSearch} />
-
-            {/*Display alerts if the exist */}
-            {alerts.length > 0 && <AlertBanner alerts={alerts} />}
 
             {/*Display spinner if loading */}
             {status === 'loading' && <Spinner />}

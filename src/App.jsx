@@ -1,7 +1,6 @@
-import { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
-// import HomePage from './Pages/HomePage/HomePage'
-// import ForecastDetailPage from './Pages/ForecastDetailPage/ForecastDetailPage'
+import HomePage from './Pages/HomePage/HomePage'
+import ForecastDetailPage from './Pages/ForeCastDetails/ForecastDetails'
 import './App.css'
 
 function App() {

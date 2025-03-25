@@ -19,21 +19,22 @@ function HomePage() {
 
     return (
         <main className="homepage">
-        <SearchBar onSearch={handleSearch} />
+            <h1>Weather Forecast</h1>
+            <SearchBar onSearch={handleSearch} />
 
-        {/* Display spinner if loading */}
-        {status === "loading" && <Spinner />}
+            {/* Display spinner if loading */}
+            {status === "loading" && <Spinner />}
 
-        {/* Display error message if error */}
-        {status === "failed" && error && <p className="error-message">{error}</p>}
+            {/* Display error message if error */}
+            {status === "failed" && error && <p className="error-message">{error}</p>}
 
-        {/* Display current weather if available */}
-        {current && status !== "loading" && <CurrentWeather data={current} />}
+            {/* Display current weather if available */}
+            {current && status !== "loading" && <CurrentWeather data={current} />}
 
-        {/* Display 5-day forecast if available */}
-        {daily && daily.length > 0 && status !== "loading" && (
-            <ForecastList days={daily} />
-        )}
+            {/* Display 5-day forecast if available */}
+            {daily && daily.length > 0 && status !== "loading" && (
+                <ForecastList days={daily} />
+            )}
         </main>
     );
 }

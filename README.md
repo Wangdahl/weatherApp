@@ -1,12 +1,114 @@
-# React + Vite
+# Weather App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
+This Weather App demonstrates modern web development practices, built using:
 
-Currently, two official plugins are available:
+- **React**
+- **Redux (Redux Toolkit)**
+- **React Router**
+- **Vite**
+- **CSS**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The application fetches weather data (current weather, a 5-day forecast, and detailed hourly forecasts) using the **Tomorrow.io API**. The design prioritizes a mobile-first approach.
 
-## Expanding the ESLint configuration
+## Folder Structure
+```
+weather-app/
+├── node_modules/            # Installed dependencies (auto-generated)
+├── public/
+├── src/
+│   ├── assets/              # (images, icons, etc.)
+│   ├── main.jsx             # Entry point for React
+│   ├── app.jsx              # Main App component
+│   ├── app.css              # Global app styles
+│   ├── main.css             # Additional global styles
+│   ├── Components/
+│   │   ├── CurrentWeather/
+│   │   │   ├── CurrentWeather.jsx
+│   │   │   └── CurrentWeather.css
+│   │   ├── ForecastDayCard/
+│   │   │   ├── ForecastDayCard.jsx
+│   │   │   └── ForecastDayCard.css
+│   │   ├── ForecastList/
+│   │   │   ├── ForecastList.jsx
+│   │   │   └── ForecastList.css
+│   │   ├── SearchBar/
+│   │   │   ├── SearchBar.jsx
+│   │   │   └── SearchBar.css
+│   │   └── Spinner/
+│   │       ├── Spinner.jsx
+│   │       └── Spinner.css
+│   ├── Pages/
+│   │   ├── HomePage/
+│   │   │   ├── HomePage.jsx
+│   │   │   └── HomePage.css
+│   │   └── ForecastDetailPage/
+│   │       ├── ForecastDetailPage.jsx
+│   │       └── ForecastDetailPage.css
+│   └── redux/
+│       ├── weatherSlice.js    # Redux slice for weather API calls and state
+│       └── store.js           # Redux store configuration
+├── index.html                 # Main HTML file
+├── .env                       # Environment variables (API keys)
+├── .gitignore                 # Git ignore file
+├── package.json               # Project metadata, scripts, dependencies
+├── package-lock.json          
+├── vite.config.js             # Vite configuration
+└── README.md                  # Project documentation (this file)
+```
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Installation
+
+### 1. Clone the Repository
+```bash
+git clone https://your-repo-url.git
+```
+
+### 2. Navigate to the Project Directory
+```bash
+cd weather-app
+```
+
+### 3. Install Dependencies
+```bash
+npm install
+```
+
+### 4. Configure API Key
+Create a `.env` file in the root directory:
+
+```env
+VITE_TOMORROW_API_KEY=your_api_key_here
+```
+
+### 5. Run Development Server
+```bash
+npm run dev
+```
+
+## Usage
+
+### Search Weather
+- Enter a city, area, or ZIP code in the **Search Bar** on the Home Page to get current weather and a 5-day forecast.
+
+### View Hourly Forecast
+- Click a forecast day from the **5-day forecast** to view hourly details.
+
+### Responsive Design
+- Optimized for mobile; scales seamlessly to larger screens.
+
+## Deployment
+
+Build the production-ready app:
+```bash
+npm run build
+```
+Deploy the generated `dist` folder using your preferred hosting service (e.g., Netlify).
+
+## Technologies
+- React
+- Redux (Redux Toolkit)
+- React Router
+- Vite
+- CSS
+- Tomorrow.io API

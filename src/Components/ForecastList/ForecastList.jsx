@@ -14,12 +14,12 @@ function ForecastList({ days = [] }) {
         <h3>5-Day Forecast</h3>
         <div className="forecast-cards">
             {days.map((day, idx) => (
-            <ForecastDayCard
-                key={idx}
-                day={day}
-                index={idx}
-                onClick={() => handleDayClick(idx)}
-            />
+                <ForecastDayCard
+                    key={idx}
+                    day={day}
+                    index={idx}
+                    onClick={() => handleDayClick(idx)}
+                />
             ))}
         </div>
         </section>

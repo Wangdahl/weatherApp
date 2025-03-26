@@ -1,0 +1,30 @@
+.search-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 300px;
+}
+@media (min-width: 780px) {
+    .search-bar {
+        width: 300px;
+    }
+}
+.searchField {
+    font-size: 1rem;
+    font-family: inherit;
+    padding: 5px 10px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 0 5px var(--primary);
+
+}
+.searchField:focus {
+    border: solid 1.5px var(--primary);
+    outline: none;
+}
+.searchField.roundBtn {
+    justify-self: flex-end;
+}
+#mIcon {
+    font-size: 1.1rem;
+}

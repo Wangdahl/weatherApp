@@ -1,0 +1,32 @@
+.forecast-day-card {
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.5s ease;
+}
+@media (max-width: 780px) {
+    .forecast-day-card {
+        max-width: 200px;
+    }
+}
+.forecast-day-card:hover {
+    box-shadow: 0 0 5px var(--primary);
+    cursor: pointer;
+    transition: all 0.5s ease;
+}
+
+.forecast-day-card h4 {
+    margin: 0;
+}
+.hourly {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+.hourlySpan {
+    transition: all 0.5s ease;
+}
+.forecast-day-card:hover .hourlySpan {
+    border-bottom: solid 1.5px var(--primary);
+    transition: all 0.5s ease;
+}

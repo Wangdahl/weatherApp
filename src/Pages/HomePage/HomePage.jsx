@@ -9,7 +9,7 @@ import "./HomePage.css";
 function HomePage() {
     const dispatch = useDispatch();
     const weatherState = useSelector((state) => state.weather);
-    const { current, daily, status, error, lastQuery } = weatherState;
+    const { current, daily, status, error } = weatherState;
 
     // Handler for search
     const handleSearch = (query) => {
@@ -19,7 +19,7 @@ function HomePage() {
 
     return (
         <main className="homepage">
-            <h1>Weather Forecast</h1>
+            <h1>WeatherApp</h1>
             <SearchBar onSearch={handleSearch} />
 
             {/* Display spinner if loading */}

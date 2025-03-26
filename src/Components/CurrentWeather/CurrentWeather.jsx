@@ -1,4 +1,5 @@
 import { WiWindy, WiThermometer, WiDaySunny, WiCloud, WiRain, WiSnow, WiThunderstorm } from 'react-icons/wi';
+import './CurrentWeather.css'
 
 function CurrentWeather({ data }) {
     if(!data) return null;

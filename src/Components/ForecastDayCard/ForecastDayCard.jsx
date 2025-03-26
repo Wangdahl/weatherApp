@@ -1,6 +1,9 @@
 import { WiCloud, WiDaySunny, WiRain, WiSnow, WiThunderstorm, WiWindy } from "react-icons/wi";
+import './ForecastDayCard.css'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons'
 
-function ForecastDayCard({ day, index, onClick }) {
+function ForecastDayCard({ day, onClick }) {
     // day contains: date, tempMin, tempMax, windSpeed, weatherCode
     const dateObj = new Date(day.date);
     const options = { weekday: "short", month: "short", day: "numeric" };
@@ -24,14 +27,16 @@ function ForecastDayCard({ day, index, onClick }) {
 
     return (
         <div className="forecast-day-card" onClick={onClick}>
-        <h4>{dateStr}</h4>
-        <div className="icon">{icon}</div>
-        <div className="temp-range">
-            <span>{Math.round(day.tempMax)}°C</span> / <span>{Math.round(day.tempMin)}°C</span>
-        </div>
-        <div className="wind">
-            <WiWindy /> {Math.round(day.windSpeed)} m/s
-        </div>
+            <h4>{dateStr}</h4>
+            <div className="icon">{icon}</div>
+            <div className="temp-range">
+                <span>{Math.round(day.tempMax)}°C</span> / <span>{Math.round(day.tempMin)}°C</span>
+            </div>
+            <div className="wind">
+                <WiWindy /> {Math.round(day.windSpeed)} m/s
+            </div>
+            <div className="hourly"><span className="hourlySpan">HOURLY VIEW</span><FontAwesomeIcon icon={faAngleRight} /></div>
+            <div className="divider"></div>
         </div>
     );
 }

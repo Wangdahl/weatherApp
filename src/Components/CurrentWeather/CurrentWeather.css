@@ -1,0 +1,40 @@
+.current-weather {
+    border: solid 0.5px var(--contrast);
+    border-radius: 8px;
+    background-color: var(--contrast);
+    box-shadow: 0 0 5px var(--primary);
+    max-width: 350px;
+}
+@media (min-width: 780px) {
+    .current-weather {
+        width: 300px;
+    }
+}
+
+h2 {
+    text-transform: capitalize;
+    margin: 1rem 1.5rem;
+    padding-bottom: 5px;
+    border-bottom: solid 1px var(--primary);
+}
+.current-temp span {
+    font-weight: 500;
+    font-size: 1.3rem;
+}
+p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+.current-temp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}

@@ -5,6 +5,9 @@
     box-shadow: 0 0 5px var(--primary);
     max-width: 350px;
 }
+.current-weather:hover {
+    cursor: pointer;
+}
 @media (min-width: 780px) {
     .current-weather {
         width: 300px;
@@ -27,6 +30,7 @@ p {
     justify-content: center;
     font-size: 1.1rem;
     font-weight: 500;
+    gap: 0.5rem;
 }
 .current-temp {
     display: flex;
@@ -37,4 +41,26 @@ p {
 svg {
     width: 1.5rem;
     height: 1.5rem;
+}
+.hourly {
+    margin-bottom: 1.5rem;
+}
+
+.current-weather:hover .hourlySpan {
+    border-bottom: solid 1.5px var(--primary);
+    transition: all 0.5s ease;
+}
+#wind-p {
+    margin-bottom: 0;
+}
+.current-weather:hover .moving-arrow {
+    animation: moveArrow 1.2s linear infinite;
+}
+@keyframes moveArrow {
+    0% { transform: translateX(0); opacity: 1;}
+    50% { transform: translateX(10px); opacity: 1;}
+    45% { opacity: 0.5; }
+    55% { opacity: 0; }
+    65% { transform: translateX(-10px); opacity: 0;}
+    100% { transform: translateX(0); opacity: 1;}
 }

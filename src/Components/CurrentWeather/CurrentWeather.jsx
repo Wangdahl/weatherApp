@@ -1,7 +1,16 @@
+import { useNavigate } from "react-router-dom";
 import { WiWindy, WiThermometer, WiDaySunny, WiCloud, WiRain, WiSnow, WiThunderstorm } from 'react-icons/wi';
 import './CurrentWeather.css'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons'
 
 function CurrentWeather({ data }) {
+    const navigate = useNavigate();
+
+    const handleDayClick = (index) => {
+        // Navigate to detail page for the day
+        navigate(`/forecast/${index}`);
+    };
     if(!data) return null;
     const { temp, windSpeed, weatherCode, cityName } = data;
 
@@ -31,14 +40,18 @@ function CurrentWeather({ data }) {
     }
 
     return (
-        <section className='current-weather'>
+        <section className='current-weather' onClick={() => handleDayClick(0)}>
             <h2>{cityName}</h2>
             <div className='current-temp'>
-                {weatherIcon}
+                <WiThermometer />
                 <span>{Math.round(temp)}°C</span>
             </div>
-            <p>{weatherDescription}</p>
-            <p><WiWindy /> Wind: {Math.round(windSpeed)} m/s</p>
+            <p>{weatherIcon}{weatherDescription}</p>
+            <p id="wind-p"><WiWindy /> {Math.round(windSpeed)} m/s</p>
+            <div className="hourly">
+                <span className="hourlySpan">HOURLY VIEW</span>
+                <FontAwesomeIcon className="moving-arrow" icon={faAngleRight} />
+            </div>
         </section>
     )
 

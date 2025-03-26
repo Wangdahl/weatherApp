@@ -35,7 +35,10 @@ function ForecastDayCard({ day, onClick }) {
             <div className="wind">
                 <WiWindy /> {Math.round(day.windSpeed)} m/s
             </div>
-            <div className="hourly"><span className="hourlySpan">HOURLY VIEW</span><FontAwesomeIcon icon={faAngleRight} /></div>
+            <div className="hourly">
+                <span className="hourlySpan">HOURLY VIEW</span>
+                <FontAwesomeIcon className="moving-arrow" icon={faAngleRight} />
+            </div>
             <div className="divider"></div>
         </div>
     );

@@ -91,8 +91,23 @@ export const fetchHourlyData = createAsyncThunk(
     'weather/fetchHourlyData',
     async ({ locationQuery, date }, { rejectWithValue }) => {
         try {
-        const startTime = new Date(date).toISOString();
-        const endTime = new Date(new Date(date).getTime() + 24 * 60 * 60 * 1000).toISOString();
+        // Construct the target date at midnight
+        const targetDate = new Date(date);
+        const startTimeDate = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth(),
+            targetDate.getDate(),
+            0, 0, 0
+        );
+        // Set endTime to the next day at midnight.
+        const endTimeDate = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth(),
+            targetDate.getDate(),
+            23, 0, 0
+        );
+        const startTime = startTimeDate.toISOString();
+        const endTime = endTimeDate.toISOString();        
         const hourlyBody = {
             location: locationQuery,
             fields: ["temperature", "windSpeed", "weatherCode"],

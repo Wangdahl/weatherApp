@@ -5,6 +5,8 @@ import { fetchHourlyData } from "../../redux/weatherSlice";
 import Spinner from "../../Components/Spinner/Spinner";
 import { WiCloud, WiDaySunny, WiRain, WiSnow, WiThunderstorm, WiWindy } from "react-icons/wi";
 import './ForecastDetails.css'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons'
 
 function ForecastDetailPage() {
     // Convert dayIndex from the URL parameter to a number
@@ -32,17 +34,14 @@ function ForecastDetailPage() {
     return (
         <section className="forecast-detail">
         <h1>
-            Hourly Forecast for{" "}
-            {new Date(selectedDay.date).toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-            })}
+            Hourly Forecast
         </h1>
-        <Link to="/" className="back-link">
-            Back to 5-day forecast
-        </Link>
-
+        <div className="link-box">
+            <Link to="/" className="back-link">
+                <FontAwesomeIcon className="move-back" id="backI" icon={faAngleLeft}/>
+            </Link>
+            <p>Back to 5-day forecast</p>
+        </div>
         {/* If loading, display spinner */}
         {hourlyStatus === "loading" && <Spinner />}
         {/* If failed, display error message */}
@@ -50,6 +49,13 @@ function ForecastDetailPage() {
         {/* If succeeded and hourly data exists, render the hourly forecast */}
         {hourlyStatus === "succeeded" && hourly && hourly.length > 0 && (
             <div className="hourly-list">
+                <p className="date">{" "}
+                    {new Date(selectedDay.date).toLocaleDateString(undefined, {
+                    weekday: "long",
+                    month: "long",
+                    day: "numeric",
+                    })}
+                </p>
                 {hourly.map((hourData, idx) => {
                     const timeStr = new Date(hourData.time).toLocaleTimeString(undefined, {
                     hour: "2-digit",
@@ -82,6 +88,12 @@ function ForecastDetailPage() {
                 })}
             </div>
         )}
+        <div className="link-box">
+            <Link to="/" className="back-link">
+                <FontAwesomeIcon className="move-back" id="backI" icon={faAngleLeft}/>
+            </Link>
+            <p>Back to 5-day forecast</p>
+        </div>
         </section>
     );
 }

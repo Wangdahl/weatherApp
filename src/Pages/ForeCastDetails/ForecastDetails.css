@@ -5,7 +5,59 @@
     justify-content: flex-start;
 }
 h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+.link-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 300px;
+    padding: 0 1rem;
+}
+.back-link {
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 1rem;
+    margin-left: 0;
+    padding: 0.75rem;
+    color: var(--contrast);
+    background-color: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 0 5px var(--primary);
+
+}
+#backI {
+    font-size: 1.2rem;
+    display: inline-block;
+}
+#back-link-down {
+    margin-top: 1rem;
+    color: var(--contrast);
+    background-color: var(--primary);
+    padding: 0.5rem;
+    padding-right: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 5px var(--primary);
+}
+.back-link:hover {
+    color: var(--contrast);
+}
+#back-link-down:hover .move-back, .back-link:hover .move-back {
+    animation: arrowMove 1.2s linear infinite;
+}
+.date {
+    display: inline-block;
+}
+@keyframes arrowMove {
+    0% { transform: translateX(0); opacity: 1;}
+    50% { transform: translateX(-10px); opacity: 1;}
+    45% { opacity: 0.5; }
+    55% { opacity: 0; }
+    65% { transform: translateX(10px); opacity: 0;}
+    100% { transform: translateX(0); opacity: 1;}
 }
 .hourly-list {
     border-radius: 8px;
@@ -18,10 +70,13 @@ h1 {
     align-items: center;
     justify-content: center;
     overflow: none;
+    padding: 1rem;
 }
 .hour-row {
+    box-sizing: border-box;
     width: 90%;
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-between;
     border-bottom: solid 1px var(--primary);
+    margin: 0 2rem;
 }

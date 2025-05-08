@@ -65,7 +65,7 @@ export const fetchWeatherData = createAsyncThunk(
             temp: currentValues.temperature,
             windSpeed: currentValues.windSpeed,
             weatherCode: currentValues.weatherCode,
-            cityName: realtimeData.location?.name ||  (isCoords ? 'Current Location' : locationQuery)
+            cityName: realtimeData.location?.name ||  (isCoords ? 'Your Location' : locationQuery)
         };
 
         // --- Extracting Daily Forecast Data ---

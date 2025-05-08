@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchWeatherData } from "../../redux/weatherSlice";
 import SearchBar from "../../Components/SearchBar/SearchBar";
@@ -10,6 +11,19 @@ function HomePage() {
     const dispatch = useDispatch();
     const weatherState = useSelector((state) => state.weather);
     const { current, daily, status, error } = weatherState;
+
+    //Logic for using geolocation to load weather data
+    useEffect(() => {
+        if (status === 'idle' && 'geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                ({ coords }) => {
+                const loc = `${coords.latitude},${coords.longitude}`;
+                dispatch(fetchWeatherData(loc));
+                },
+                () => {}
+            );
+        }
+    }, [dispatch, status]);
 
     // Handler for search
     const handleSearch = (query) => {

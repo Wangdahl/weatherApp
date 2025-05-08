@@ -8,57 +8,80 @@ export const fetchWeatherData = createAsyncThunk(
     'weather/fetchWeatherData',
     async (locationQuery, { rejectWithValue }) => {
         try {
-            // ── Realtime GET ──
-            const realtimeUrl = `https://api.tomorrow.io/v4/weather/realtime?location=${encodeURIComponent(locationQuery)}&units=metric&apikey=${apiKey}`;
-            const realtimeRes = await fetch(realtimeUrl);
-            if (!realtimeRes.ok) {
-                const txt = await realtimeRes.text();
-                throw new Error(`Realtime GET error ${realtimeRes.status}: ${txt}`);
-            }
-            const realtimeData = await realtimeRes.json();
-            const currentValues = realtimeData.data.values;
-            const cityName = realtimeData.data.location.name;
-    
-            // ── Daily 4-day forecast POST ──
-            const startTime = new Date().toISOString();
-            const endTime = new Date(Date.now() + 4*24*60*60*1000).toISOString();
-            const dailyBody = {
-                location: locationQuery,
-                fields: ["temperatureMin", "temperatureMax", "windSpeed", "weatherCode"],
-                timesteps: ["1d"],
-                units: "metric",
-                startTime,
-                endTime
-            };
-            const dailyRes = await fetch(timelinesUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dailyBody)
-            });
-            if (!dailyRes.ok) {
-                const txt = await dailyRes.text();
-                throw new Error(`Daily forecast error: ${dailyRes.status} - ${txt}`);
-            }
-            const dailyData = await dailyRes.json();
-            const daily = dailyData.data.timelines[0].intervals.map(interval => ({
-                date: interval.startTime,
-                tempMin: interval.values.temperatureMin,
-                tempMax: interval.values.temperatureMax,
-                windSpeed: interval.values.windSpeed,
-                weatherCode: interval.values.weatherCode
-            }));
-    
-            // ── Package and return ──
-            const current = {
-                temp: currentValues.temperature,
-                windSpeed: currentValues.windSpeed,
-                weatherCode: currentValues.weatherCode,
-                cityName
-            };
-            return { current, daily };
+        // --- Realtime Data (Current) ---
+        const now = new Date();
+        // Create a 1-minute window for the "current" timestep
+        const oneMinuteLater = new Date(now.getTime() + 60 * 1000).toISOString();
+        const realtimeBody = {
+            location: locationQuery, // e.g., "New York, United States"
+            fields: ["temperature", "windSpeed", "weatherCode"],
+            timesteps: ["current"],
+            units: "metric",
+            startTime: now.toISOString(),
+            endTime: oneMinuteLater
+        };
+
+        const realtimeRes = await fetch(timelinesUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(realtimeBody)
+        });
+        if (!realtimeRes.ok) {
+            const errorText = await realtimeRes.text();
+            throw new Error(`Realtime error: ${realtimeRes.status} - ${errorText}`);
+        }
+        const realtimeData = await realtimeRes.json();
+
+        // --- Daily Forecast Data (4-day forecast due to plan restriction) ---
+        const startTime = new Date().toISOString();
+        // Use 4 days ahead instead of 5 to avoid the Forbidden error.
+        const endTime = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString();
+        const dailyBody = {
+            location: locationQuery,
+            fields: ["temperatureMin", "temperatureMax", "windSpeed", "weatherCode"],
+            timesteps: ["1d"],
+            units: "metric",
+            startTime,
+            endTime
+        };
+
+        const dailyRes = await fetch(timelinesUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dailyBody)
+        });
+        if (!dailyRes.ok) {
+            const errorText = await dailyRes.text();
+            throw new Error(`Daily forecast error: ${dailyRes.status} - ${errorText}`);
+        }
+        const dailyData = await dailyRes.json();
+
+        // --- Extracting Realtime Data ---
+        const realtimeTimeline = realtimeData.data.timelines[0];
+        const realtimeInterval = realtimeTimeline.intervals[0];
+        const currentValues = realtimeInterval.values;
+        const isCoords = /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(locationQuery);
+        const current = {
+            temp: currentValues.temperature,
+            windSpeed: currentValues.windSpeed,
+            weatherCode: currentValues.weatherCode,
+            cityName: realtimeData.location?.name ||  (isCoords ? 'Current Location' : locationQuery)
+        };
+
+        // --- Extracting Daily Forecast Data ---
+        const dailyTimeline = dailyData.data.timelines[0];
+        const daily = dailyTimeline.intervals.map(interval => ({
+            date: interval.startTime,
+            tempMin: interval.values.temperatureMin,
+            tempMax: interval.values.temperatureMax,
+            windSpeed: interval.values.windSpeed,
+            weatherCode: interval.values.weatherCode
+        }));
+
+        return { current, daily };
         } catch (err) {
-            console.error('Error fetching weather data:', err);
-            return rejectWithValue('Failed to fetch weather data. Please try again.');
+        console.error('Error fetching weather data:', err);
+        return rejectWithValue('Failed to fetch weather data. Please try again.');
         }
     }
 );
